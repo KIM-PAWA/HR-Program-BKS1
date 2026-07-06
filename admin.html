@@ -458,16 +458,32 @@ async function doAdminLogin() {
   const errBox   = document.getElementById("loginError");
   errBox.classList.remove("show");
   if (!username || !password) { errBox.textContent = "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน"; errBox.classList.add("show"); return; }
+
+  // แสดง loading
+  document.getElementById("loginCard").style.display = "none";
+  document.getElementById("loadingScreen").style.display = "block";
+
   try {
     const res = await jsonpCall({ action: "adminLogin", username, password });
-    if (!res.success) { errBox.textContent = res.message || "เข้าสู่ระบบไม่สำเร็จ"; errBox.classList.add("show"); return; }
+    if (!res.success) {
+      document.getElementById("loadingScreen").style.display = "none";
+      document.getElementById("loginCard").style.display = "block";
+      errBox.textContent = res.message || "เข้าสู่ระบบไม่สำเร็จ";
+      errBox.classList.add("show");
+      return;
+    }
     ADMIN_NAME = res.name;
-    ADMIN_PASS = password; // เก็บไว้สำหรับ verify ตอนแก้ไข/ลบ
+    ADMIN_PASS = password;
     document.getElementById("adminNameDisplay").textContent = ADMIN_NAME;
-    document.getElementById("loginCard").style.display = "none";
+    document.getElementById("loadingScreen").style.display = "none";
     document.getElementById("mainApp").style.display = "block";
     await loadAllData();
-  } catch (err) { errBox.textContent = "เชื่อมต่อไม่สำเร็จ: " + err.message; errBox.classList.add("show"); }
+  } catch (err) {
+    document.getElementById("loadingScreen").style.display = "none";
+    document.getElementById("loginCard").style.display = "block";
+    errBox.textContent = "เชื่อมต่อไม่สำเร็จ: " + err.message;
+    errBox.classList.add("show");
+  }
 }
 
 function doAdminLogout() {
