@@ -459,13 +459,16 @@ async function doAdminLogin() {
   errBox.classList.remove("show");
   if (!username || !password) { errBox.textContent = "กรุณากรอกชื่อผู้ใช้และรหัสผ่าน"; errBox.classList.add("show"); return; }
 
-  // แสดง loading
-  document.getElementById("loginCard").style.display = "none";
-  document.getElementById("loadingScreen").style.display = "block";
+  // แสดง loading ในปุ่ม
+  const btn = document.querySelector("#loginCard .btn-primary");
+  btn.textContent = "กำลังเข้าสู่ระบบ...";
+  btn.disabled = true;
 
   try {
     const res = await jsonpCall({ action: "adminLogin", username, password });
     if (!res.success) {
+      btn.textContent = "เข้าสู่ระบบ";
+      btn.disabled = false;
       document.getElementById("loadingScreen").style.display = "none";
       document.getElementById("loginCard").style.display = "block";
       errBox.textContent = res.message || "เข้าสู่ระบบไม่สำเร็จ";
@@ -475,10 +478,17 @@ async function doAdminLogin() {
     ADMIN_NAME = res.name;
     ADMIN_PASS = password;
     document.getElementById("adminNameDisplay").textContent = ADMIN_NAME;
+    document.getElementById("loadingScreen").style.display = "block";
+    document.getElementById("loginCard").style.display = "none";
+    document.getElementById("mainApp").style.display = "none";
+    await loadAllData();
     document.getElementById("loadingScreen").style.display = "none";
     document.getElementById("mainApp").style.display = "block";
-    await loadAllData();
+    btn.textContent = "เข้าสู่ระบบ";
+    btn.disabled = false;
   } catch (err) {
+    btn.textContent = "เข้าสู่ระบบ";
+    btn.disabled = false;
     document.getElementById("loadingScreen").style.display = "none";
     document.getElementById("loginCard").style.display = "block";
     errBox.textContent = "เชื่อมต่อไม่สำเร็จ: " + err.message;
