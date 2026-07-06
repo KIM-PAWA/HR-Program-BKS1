@@ -537,7 +537,7 @@ function renderDashboard(emp) {
     document.getElementById(tc.daysId).innerHTML =
       b ? `${b.days} <span>วัน</span>` : `— <span>วัน</span>`;
     document.getElementById(tc.hoursId).textContent =
-      b && b.hours ? `(${b.hours} ชม.)` : "";
+      b ? `${b.hours} ชม. ${b.mins} นาที` : "—";
   });
 
   // คำนวณวันลากิจคงเหลือในปีบัญชีนี้
