@@ -85,6 +85,7 @@
   .calc-result{background:var(--mint);border-radius:var(--radius-sm);padding:12px 14px;font-size:0.85rem;margin-top:10px;display:none;}
   .calc-result.show{display:block;}
   .calc-result b{color:var(--mint-dark);}
+  .mini-spinner{width:16px;height:16px;border:2px solid var(--mint-mid);border-top-color:var(--mint-dark);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
 
   /* Confirm password modal */
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;align-items:center;justify-content:center;z-index:998;padding:16px;}
@@ -181,9 +182,10 @@
         <div class="field"><label>นาทีสิ้นสุด</label><input id="leaveEndMin" type="number" min="0" max="59" placeholder="00" /></div>
       </div>
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button class="btn btn-secondary" onclick="calcLeavePreview()">🧮 คำนวณ</button>
-        <button class="btn btn-primary" onclick="submitLeave()">💾 บันทึก</button>
+        <button class="btn btn-secondary" id="btnCalc" onclick="calcLeavePreview()">🧮 คำนวณ</button>
+        <button class="btn btn-primary" id="btnSave" onclick="submitLeave()">💾 บันทึก</button>
         <button class="btn btn-danger" id="cancelEditBtn" style="display:none" onclick="cancelEdit()">ยกเลิกแก้ไข</button>
+        <div id="leaveStatus" style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--text-mid);"></div>
       </div>
       <div class="calc-result" id="calcResult"></div>
     </div>
@@ -717,6 +719,31 @@ function formatIdCard(id) {
   return `${digits[0]}-${digits.slice(1,5)}-${digits.slice(5,10)}-${digits.slice(10,12)}-${digits[12]}`;
 }
 
+function setLeaveStatus(type, msg) {
+  const box = document.getElementById("leaveStatus");
+  const btnCalc = document.getElementById("btnCalc");
+  const btnSave = document.getElementById("btnSave");
+  if (type === "loading") {
+    box.innerHTML = `<div class="mini-spinner"></div><span>${msg}</span>`;
+    btnCalc.disabled = true;
+    btnSave.disabled = true;
+  } else if (type === "success") {
+    box.innerHTML = `<span style="color:var(--mint-dark);">✅ ${msg}</span>`;
+    btnCalc.disabled = false;
+    btnSave.disabled = false;
+    setTimeout(() => { box.innerHTML = ""; }, 4000);
+  } else if (type === "error") {
+    box.innerHTML = `<span style="color:#c0464f;">❌ ${msg}</span>`;
+    btnCalc.disabled = false;
+    btnSave.disabled = false;
+    setTimeout(() => { box.innerHTML = ""; }, 4000);
+  } else {
+    box.innerHTML = "";
+    btnCalc.disabled = false;
+    btnSave.disabled = false;
+  }
+}
+
 function convertToThaiYear(dateStr) {
   if (!dateStr) return "";
   const parts = dateStr.split("/");
@@ -746,13 +773,15 @@ async function calcLeavePreview() {
   if (!payload.empName)   { showToast("กรุณาเลือกพนักงาน", true); return; }
   if (!payload.leaveType) { showToast("กรุณาเลือกประเภทการลา", true); return; }
   if (!payload.startDate || !payload.endDate) { showToast("กรุณากรอกวันที่", true); return; }
+  setLeaveStatus("loading", "กำลังคำนวณ...");
   try {
     const res = await jsonpCall({ action: "calcLeave", payload: JSON.stringify(payload) });
-    if (!res.success) { showToast(res.message, true); return; }
+    if (!res.success) { setLeaveStatus("error", res.message); return; }
     const box = document.getElementById("calcResult");
     box.innerHTML = `วันลาครั้งนี้: <b>${res.thisLeave.days} วัน ${res.thisLeave.hours} ชม. ${res.thisLeave.mins} นาที</b><br>วันลาสะสมหลังรวม: <b>${res.accumLeave.days} วัน ${res.accumLeave.hours} ชม. ${res.accumLeave.mins} นาที</b>`;
     box.classList.add("show");
-  } catch (err) { showToast("คำนวณไม่สำเร็จ: " + err.message, true); }
+    setLeaveStatus("success", "คำนวณเสร็จแล้ว");
+  } catch (err) { setLeaveStatus("error", "เชื่อมต่อไม่ได้"); }
 }
 
 async function submitLeave() {
@@ -761,7 +790,6 @@ async function submitLeave() {
   if (!payload.leaveType) { showToast("กรุณาเลือกประเภทการลา", true); return; }
   if (!payload.startDate || !payload.endDate) { showToast("กรุณากรอกวันที่", true); return; }
 
-  // ถ้าเป็นการแก้ไข ต้องยืนยันรหัสผ่านก่อน
   if (editingRowIndex) {
     openConfirmModal("ยืนยันการแก้ไขรายการลาของ " + payload.empName, async () => {
       await _doSaveLeave(payload);
@@ -772,13 +800,15 @@ async function submitLeave() {
 }
 
 async function _doSaveLeave(payload) {
+  setLeaveStatus("loading", "กำลังบันทึก...");
   try {
     const res = await jsonpCall({ action: "saveLeave", payload: JSON.stringify(payload) });
-    if (!res.success) { showToast(res.message, true); return; }
+    if (!res.success) { setLeaveStatus("error", res.message); return; }
+    setLeaveStatus("success", "บันทึกเสร็จแล้ว");
     showToast(res.message);
     resetLeaveForm();
     await loadAllData();
-  } catch (err) { showToast("บันทึกไม่สำเร็จ: " + err.message, true); }
+  } catch (err) { setLeaveStatus("error", "เชื่อมต่อไม่ได้"); }
 }
 
 function resetLeaveForm() {
