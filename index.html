@@ -536,8 +536,12 @@ function renderDashboard(emp) {
     const b = balance[tc.type];
     document.getElementById(tc.daysId).innerHTML =
       b ? `${b.days} <span>วัน</span>` : `— <span>วัน</span>`;
-    document.getElementById(tc.hoursId).textContent =
-      b ? `${b.hours} ชม. ${b.mins} นาที` : "—";
+    if (b) {
+      const hrs = b.mins > 0 ? (b.hours + b.mins / 60).toFixed(1) : b.hours;
+      document.getElementById(tc.hoursId).textContent = `${hrs} ชม.`;
+    } else {
+      document.getElementById(tc.hoursId).textContent = "—";
+    }
   });
 
   // คำนวณวันลากิจคงเหลือในปีบัญชีนี้
