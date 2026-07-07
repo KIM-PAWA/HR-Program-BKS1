@@ -203,11 +203,13 @@
       <div class="login-sub">กรุณาใส่ข้อมูลเพื่อเข้าสู่ระบบ</div>
       <div class="field">
         <label for="inputName">ชื่อจริง (ไม่ต้องมีคำนำหน้า)</label>
-        <input id="inputName" type="text" placeholder="เช่น กวินทร์" autocomplete="off" />
+        <input id="inputName" type="text" placeholder="เช่น กวินทร์" autocomplete="off"
+          onkeydown="if(event.key==='ArrowDown'){event.preventDefault();document.getElementById('inputId').focus();}" />
       </div>
       <div class="field">
         <label for="inputId">รหัสพนักงาน</label>
-        <input id="inputId" type="text" placeholder="กรอกรหัสพนักงาน" autocomplete="off" />
+        <input id="inputId" type="text" placeholder="กรอกรหัสพนักงาน" autocomplete="off"
+          onkeydown="if(event.key==='ArrowUp'){event.preventDefault();document.getElementById('inputName').focus();}" />
       </div>
       <button class="btn-primary" onclick="doLogin()">เข้าสู่ระบบ</button>
       <div class="login-error" id="loginError">❌ ไม่พบข้อมูลพนักงาน กรุณาตรวจสอบชื่อและรหัสอีกครั้ง</div>

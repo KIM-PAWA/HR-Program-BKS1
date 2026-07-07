@@ -114,12 +114,14 @@
     <div class="login-sub">กรุณากรอกชื่อผู้ใช้และรหัสผ่านของคุณ</div>
     <div class="field">
       <label>ชื่อผู้ใช้</label>
-      <input id="adminUser" type="text" autocomplete="off" />
+      <input id="adminUser" type="text" autocomplete="off"
+        onkeydown="if(event.key==='ArrowDown'){event.preventDefault();document.getElementById('adminPass').focus();}" />
     </div>
     <div class="field">
       <label>รหัสผ่าน</label>
       <div class="pass-wrap">
-        <input id="adminPass" type="password" autocomplete="off" />
+        <input id="adminPass" type="password" autocomplete="off"
+          onkeydown="if(event.key==='ArrowUp'){event.preventDefault();document.getElementById('adminUser').focus();}" />
         <button class="pass-toggle" type="button" onclick="togglePass('adminPass',this)" tabindex="-1">👁</button>
       </div>
     </div>
