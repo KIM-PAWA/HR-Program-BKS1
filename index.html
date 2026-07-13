@@ -320,7 +320,10 @@
         </div>
       </div>
 
-      <button class="btn-logout" onclick="doLogout()">🚪 ออกจากระบบ</button>
+      <div style="display:flex;gap:8px;margin-top:22px;">
+        <button class="btn-logout" style="flex:1;" onclick="refreshEmpData()">🔄 รีเฟรช</button>
+        <button class="btn-logout" style="flex:1;" onclick="doLogout()">🚪 ออกจากระบบ</button>
+      </div>
     </div>
   </div>
 </div>
@@ -585,6 +588,12 @@ function doLogout() {
   document.getElementById("inputName").value = "";
   document.getElementById("inputId").value   = "";
   showState("stateLogin");
+}
+
+async function refreshEmpData() {
+  const syncTime = document.getElementById("syncTime");
+  if (syncTime) syncTime.textContent = "กำลังรีเฟรช...";
+  await loadData();
 }
 
 document.addEventListener("keydown", e => {

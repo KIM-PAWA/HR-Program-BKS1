@@ -133,7 +133,10 @@
   <div id="mainApp" style="display:none">
     <div class="topbar">
       <div class="topbar-name">สวัสดี, <span id="adminNameDisplay"></span></div>
-      <button class="btn btn-secondary btn-sm" onclick="doAdminLogout()">ออกจากระบบ</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm" onclick="refreshData()">🔄 รีเฟรช</button>
+        <button class="btn btn-secondary btn-sm" onclick="doAdminLogout()">ออกจากระบบ</button>
+      </div>
     </div>
     <div class="tabs">
       <div class="tab active" data-tab="employees" onclick="switchTab('employees')">👥 ข้อมูลพนักงาน</div>
@@ -496,6 +499,12 @@ async function doAdminLogin() {
     errBox.textContent = "เชื่อมต่อไม่สำเร็จ: " + err.message;
     errBox.classList.add("show");
   }
+}
+
+async function refreshData() {
+  showToast("กำลังรีเฟรชข้อมูล...");
+  await loadAllData();
+  showToast("✅ รีเฟรชเสร็จแล้ว");
 }
 
 function doAdminLogout() {
